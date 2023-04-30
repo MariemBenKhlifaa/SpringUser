@@ -120,33 +120,30 @@ public class AuthController {
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
+        for (String name :strRoles){
+            if(name.equals("ROLE_USER")){
+                Role userRole = roleRepository.findByName(ERole.ROLE_USER).get();
+                roles.add(userRole);
 
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
+            }
+            else if (name.equals("ROLE_ADMIN")){
+                Role userRole = roleRepository.findByName(ERole.ROLE_ADMIN).get();
 
-                        break;
-                     case "club":
-                        Role clubRole = roleRepository.findByName(ERole.ROLE_CLUB)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(clubRole);
 
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
+                roles.add(userRole);
+            }
+            else {
+                Role userRole = roleRepository.findByName(ERole.ROLE_CLUB).get();
+
+
+                roles.add(userRole);
+
+            }
+
+
         }
+
+
 
         user.setRoles(roles);
         userRepository.save(user);
