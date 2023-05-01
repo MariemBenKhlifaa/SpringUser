@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.springjasser.entities.ERole;
@@ -35,6 +36,7 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -93,6 +95,7 @@ public class AuthController {
                         roles));
     }
     @PostMapping("/signup")
+    @Transactional
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
@@ -118,15 +121,16 @@ public class AuthController {
                 encoder.encode(signUpRequest.getPassword()));
 
 
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
-        for (String name :strRoles){
-            if(name.equals("ROLE_USER")){
+    //    Set<Role> strRoles = signUpRequest.getRole();
+
+      /*  Set<Role> roles = new HashSet<>();
+        for (Role role :strRoles){
+            if(role.getName().equals("ROLE_USER")){
                 Role userRole = roleRepository.findByName(ERole.ROLE_USER).get();
                 roles.add(userRole);
 
             }
-            else if (name.equals("ROLE_ADMIN")){
+            else if (role.getName().equals("ROLE_ADMIN")){
                 Role userRole = roleRepository.findByName(ERole.ROLE_ADMIN).get();
 
 
@@ -143,9 +147,29 @@ public class AuthController {
 
         }
 
+*/
+
+        Set<Role> RoleList = signUpRequest.getRole();
+        for (Role role:RoleList){
+           // roleRepository.save(role);
+            if(role.getName().equals(ERole.ROLE_USER)){
+                Set<Role>  userRole = roleRepository.getBynaame(ERole.ROLE_USER);
+                user.setRole(userRole);
+
+            }
+            else if (role.getName().equals(ERole.ROLE_ADMIN)){
+                Set<Role>  userRole = roleRepository.getBynaame(ERole.ROLE_ADMIN);
+                user.setRole(userRole);
+            }
+            else {
+                Set<Role>  userRole = roleRepository.getBynaame(ERole.ROLE_CLUB);
+                user.setRole(userRole);
+            }
 
 
-        user.setRoles(roles);
+        }
+        System.out.println(signUpRequest.getRole());
+
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
@@ -229,6 +253,25 @@ public class AuthController {
 
 
       //  return "reset_password_form";
+
+    }
+    @GetMapping("/users")
+    public List<User> getusers(){
+
+            return  userRepository.findAll();
+
+
+
+    }
+    @DeleteMapping("/deleteuser/{id}")
+    public void deleteuser(@PathVariable("id") Long id){
+      User userr = userRepository.findById(id).get();
+      if(userr != null){
+          userRepository.delete(userr);
+      }
+
+
+
 
     }
 }

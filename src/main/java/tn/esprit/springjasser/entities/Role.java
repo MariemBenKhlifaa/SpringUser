@@ -1,9 +1,12 @@
 package tn.esprit.springjasser.entities;
 
+import lombok.ToString;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "roles")
+@ToString
 public class  Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

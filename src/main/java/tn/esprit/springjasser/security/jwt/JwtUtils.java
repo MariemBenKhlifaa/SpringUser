@@ -1,15 +1,23 @@
 package tn.esprit.springjasser.security.jwt;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.util.WebUtils;
+import tn.esprit.springjasser.entities.Role;
+import tn.esprit.springjasser.entities.User;
+import tn.esprit.springjasser.repository.UserRepository;
 import tn.esprit.springjasser.security.services.UserDetailsImpl;
 
 import javax.servlet.http.Cookie;
@@ -27,7 +35,8 @@ public class JwtUtils {
 
     @Value("jasser")
     private String jwtCookie;
-
+    @Autowired
+    UserRepository userRepository;
     public ResponseCookie getCleanJwtCookie() {
         ResponseCookie cookie = ResponseCookie.from(jwtCookie, null).path("/api").build();
         return cookie;
@@ -44,8 +53,12 @@ public class JwtUtils {
 
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
+        User user = userRepository.findByUsername(userPrincipal.getUsername()).get();
+
+        Set<Role> roles = user.getRole();
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)

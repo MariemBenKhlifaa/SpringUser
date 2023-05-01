@@ -3,6 +3,8 @@ package tn.esprit.springjasser.payload.request;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import tn.esprit.springjasser.entities.Role;
 
 
 import javax.validation.constraints.Email;
@@ -15,6 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class SignupRequest {
     private String firstName;
     private String lastName;
@@ -30,7 +33,8 @@ public class SignupRequest {
     private Date createdAt;
     @NotBlank
     private String password;
-    private Set<String> role;
+
+    private Set<Role> role;
 
     public SignupRequest(String firstName, String lastName, String username, Date dateOfBirth, String email, String contactNumber, Date createdAt, String password) {
         this.firstName = firstName;
